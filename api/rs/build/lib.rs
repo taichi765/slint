@@ -276,6 +276,17 @@ impl CompilerConfiguration {
         Self { config }
     }
 
+    /// Add custom attribute on the generated types filtered by `filter_fn`.
+    #[must_use]
+    pub fn attribute<F>(self, filter_fn: F, attr: impl Into<String>) -> Self
+    where
+        F: Fn(String) -> bool + 'static,
+    {
+        let mut config = self.config;
+        config.attributes.push((std::rc::Rc::new(filter_fn), attr.into()));
+        Self { config }
+    }
+
     /// Converts any relative include_paths or library_paths to absolute paths relative to the manifest_dir.
     #[must_use]
     fn with_absolute_paths(self, manifest_dir: &std::path::Path) -> Self {

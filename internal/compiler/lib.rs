@@ -208,6 +208,9 @@ pub struct CompilerConfiguration {
     /// safety-critical subset.
     #[cfg(feature = "slint-sc")]
     pub(crate) slint_sc: bool,
+
+    /// Custom attributes to apply to generated types.
+    pub attributes: Vec<(Rc<dyn Fn(String) -> bool>, String)>,
 }
 
 impl CompilerConfiguration {
@@ -309,6 +312,7 @@ impl CompilerConfiguration {
             rust_module: None,
             #[cfg(feature = "slint-sc")]
             slint_sc,
+            attributes: Default::default(),
         }
     }
 }

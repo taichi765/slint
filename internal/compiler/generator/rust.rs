@@ -2092,6 +2092,26 @@ fn generate_global(
         quote!()
     };
 
+    let public_custom_attributes = compiler_config
+        .attributes
+        .iter()
+        .filter_map(
+            |(filter_fn, attr)| {
+                if filter_fn(public_component_id.to_string()) { Some(attr) } else { None }
+            },
+        )
+        .map(|attr| quote! {#attr});
+
+    let private_custom_attributes = compiler_config
+        .attributes
+        .iter()
+        .filter_map(
+            |(filter_fn, attr)| {
+                if filter_fn(inner_component_id.to_string()) { Some(attr) } else { None }
+            },
+        )
+        .map(|attr| quote! {#attr});
+
     let public_interface = global.exported.then(|| {
         let property_and_callback_accessors = public_api(
             &global.public_properties,
@@ -2115,6 +2135,7 @@ fn generate_global(
 
         quote!(
             #[allow(unused)]
+            #(#public_custom_attributes)*
             pub struct #public_component_id<'a>(#pub_token ::core::pin::Pin<sp::Rc<#inner_component_id>>, #pub_token ::core::marker::PhantomData<&'a #inner_component_id>);
 
             impl<'a> #public_component_id<'a> {
@@ -2129,6 +2150,7 @@ fn generate_global(
 
     let private_interface = (!global.is_builtin).then(|| {
         quote!(
+            #(#private_custom_attributes)*
             #[derive(sp::FieldOffsets, Default)]
             #[const_field_offset(sp::const_field_offset)]
             #[repr(C)]
