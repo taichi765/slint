@@ -2100,7 +2100,10 @@ fn generate_global(
                 if filter_fn(public_component_id.to_string()) { Some(attr) } else { None }
             },
         )
-        .map(|attr| quote! {#attr});
+        .map(|attr| {
+            let attr: proc_macro2::TokenStream = attr.parse().expect("failed to parse attribute");
+            quote! {#attr}
+        });
 
     let private_custom_attributes = compiler_config
         .attributes
@@ -2110,7 +2113,10 @@ fn generate_global(
                 if filter_fn(inner_component_id.to_string()) { Some(attr) } else { None }
             },
         )
-        .map(|attr| quote! {#attr});
+        .map(|attr| {
+            let attr: proc_macro2::TokenStream = attr.parse().expect("failed to parse attribute");
+            quote! {#attr}
+        });
 
     let public_interface = global.exported.then(|| {
         let property_and_callback_accessors = public_api(
